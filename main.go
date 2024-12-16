@@ -17,6 +17,7 @@ import (
 
 func getEnv(key string) string {
     if value, ok := os.LookupEnv(key); ok {
+        log.Printf("ENV: %s=%s", key, value)
         if value != "" {
             return value
         }
@@ -97,16 +98,16 @@ func main() {
             log.Printf("\n")
             log.Printf("Bytes length: %d\n", len(b))
             if len(b) >= 8 {
-                log.Printf("Dump:  (0-7): % X\n", b[:8])
+                log.Printf("Dump: (0-7) % X\n", b[:8])
             }
             if len(b) >= 16 {
-                log.Printf("      (8-15): % X\n", b[8:16])
+                log.Printf("     (8-15) % X\n", b[8:16])
             }
             if len(b) >= 24 {
-                log.Printf("     (16-23): % X\n", b[16:24])
+                log.Printf("    (16-23) % X\n", b[16:24])
             }
             if len(b) >= 32 {
-                log.Printf("     (24-31): % X\n", b[24:32])
+                log.Printf("    (24-31) % X\n", b[24:32])
             }
             log.Printf("\n")
 
@@ -149,7 +150,8 @@ func main() {
                         shouldLift = true
                         log.Printf("-> YES, please lift me up!!!\n")
                     } else {
-                        shouldLift = true // FIXME: debug only
+                        shouldLift = false
+                        loop = false
                         log.Printf("-> NO, I can't lift you...\n")
                     }
                 case 71:
@@ -159,7 +161,7 @@ func main() {
                     i += l
                     endIdx = i
                     before = getIntFromLittleEndianBytes(mode)
-                    log.Printf("-> (71) user mode: mode=%d\n", getIntFromLittleEndianBytes(mode))
+                    log.Printf("-> (71) client: mode=%d\n", before)
                     loop = false
                 default:
                     log.Printf("-> (%d) don't care what it is. stop here.\n", pId)
@@ -171,19 +173,19 @@ func main() {
 
             if shouldLift {
                 log.Printf("######## Lift U UP!!! ########\n")
-                log.Printf("Before: mode=%d (%d)\n", before, getLittleEndianBytesFromInt(uint32(before)))
+                log.Printf("Before: mode=%d (% X)\n", before, getLittleEndianBytesFromInt(uint32(before)))
                 if (before & 0x1) == 1 {
-                    after = before | (1 << 4) // TODO: to be verified
+                    after = before | (1 << 2)
                     as := getLittleEndianBytesFromInt(uint32(after))
-                    log.Printf("After:  mode=%d (%d)\n", after, as)
+                    log.Printf("After:  mode=%d (% X)\n", after, as)
                     if len(as) == (endIdx - startIdx) { // final check
-                        //b = slices.Replace(b, startIdx, endIdx, as...) // FIXME: attention!
-                        log.Printf("-> here you go! Dump: (%d-%d): % X\n", startIdx, endIdx - 1, b[startIdx:endIdx])
+                        b = slices.Replace(b, startIdx, endIdx, as...)
+                        log.Printf("-> here you go! Dump: (%d-%d) % X\n", startIdx, endIdx - 1, b[startIdx:endIdx])
                     } else {
                         log.Printf("-> something wrong here... I can't lift you.\n")
                     }
                 } else {
-                    log.Printf("-> wait are you banned? I can't lift you.\n")
+                    log.Printf("-> wait aren't you a player? I can't lift you.\n")
                 }
             }
         }
@@ -195,5 +197,5 @@ func main() {
         return nil
     }
 
-    log.Fatal(http.ListenAndServe(getListenPort(), proxy))
+    log.Fatal(http.ListenAndServe(p, proxy))
 }
