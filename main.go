@@ -93,23 +93,22 @@ func main() {
         defer r.Body.Close()
 
         if r.Header.Get(h) != "" {
-            fmt.Printf("\n----------------------------------------------------------------\n")
-            log.Printf("Get response, wanna inspect this...\n")
-            log.Printf("\n")
-            log.Printf("Bytes length: %d\n", len(b))
+            msg := ""
+            msg += fmt.Sprintf(">>> Get response, wanna inspect this...\n")
+            msg += fmt.Sprintf("Bytes length: %d\n", len(b))
             if len(b) >= 8 {
-                log.Printf("Dump: (0-7) % X\n", b[:8])
+                msg += fmt.Sprintf("Dump: (0-7) % X\n", b[:8])
             }
             if len(b) >= 16 {
-                log.Printf("     (8-15) % X\n", b[8:16])
+                msg += fmt.Sprintf("     (8-15) % X\n", b[8:16])
             }
             if len(b) >= 24 {
-                log.Printf("    (16-23) % X\n", b[16:24])
+                msg += fmt.Sprintf("    (16-23) % X\n", b[16:24])
             }
             if len(b) >= 32 {
-                log.Printf("    (24-31) % X\n", b[24:32])
+                msg += fmt.Sprintf("    (24-31) % X\n", b[24:32])
             }
-            log.Printf("\n")
+            msg += fmt.Sprintf("\n")
 
             shouldLift := false
             var before int
@@ -122,21 +121,21 @@ func main() {
             for loop := true; loop; {
                 l, err := binary.Decode(b[i:], binary.LittleEndian, &ph)
                 if err != nil {
-                    log.Printf("Read EOF. finish.\n")
+                    msg += fmt.Sprintf("Read EOF. finish.\n")
                     shouldLift = false
                     break
                 }
                 i += l
                 pId := getIntFromLittleEndianBytes(ph.Id[:3])
                 pLen := getIntFromLittleEndianBytes(ph.Length[:4])
-                log.Printf("Read packet: id=%d, len=%d\n", pId, pLen)
+                msg += fmt.Sprintf("Read packet: id=%d, len=%d\n", pId, pLen)
 
                 switch pId {
                 case 75:
                     ver := make([]byte, pLen, pLen)
                     l, _ := binary.Decode(b[i:i + pLen], binary.LittleEndian, &ver)
                     i += l
-                    log.Printf("-> (75) protocol: ver=%d\n", getIntFromLittleEndianBytes(ver))
+                    msg += fmt.Sprintf("-> (75) protocol: ver=%d\n", getIntFromLittleEndianBytes(ver))
                 case 5:
                     id := make([]byte, pLen, pLen)
                     l, _ := binary.Decode(b[i:i + pLen], binary.LittleEndian, &id)
@@ -145,14 +144,14 @@ func main() {
                     if idNum >= 0x8000_0000 { // negative number
                         idNum = idNum - 0xFFFF_FFFF - 1
                     }
-                    log.Printf("-> (5) reply: id=%d\n", idNum)
+                    msg += fmt.Sprintf("-> (5) reply: id=%d\n", idNum)
                     if slices.Contains(a, idNum) {
                         shouldLift = true
-                        log.Printf("-> YES, please lift me up!!!\n")
+                        msg += fmt.Sprintf("-> YES, please lift me up!!!\n")
                     } else {
                         shouldLift = false
                         loop = false
-                        log.Printf("-> NO, I can't lift you...\n")
+                        msg += fmt.Sprintf("-> NO, I can't lift you...\n")
                     }
                 case 71:
                     mode := make([]byte, pLen, pLen)
@@ -161,33 +160,36 @@ func main() {
                     i += l
                     endIdx = i
                     before = getIntFromLittleEndianBytes(mode)
-                    log.Printf("-> (71) client: mode=%d\n", before)
+                    msg += fmt.Sprintf("-> (71) client: mode=%d\n", before)
                     loop = false
                 default:
-                    log.Printf("-> (%d) don't care what it is. stop here.\n", pId)
+                    msg += fmt.Sprintf("-> (%d) don't care what it is. stop here.\n", pId)
                     shouldLift = false
                     loop = false
                 }
-                log.Printf("\n")
+                msg += fmt.Sprintf("\n")
             }
 
             if shouldLift {
-                log.Printf("######## Lift U UP!!! ########\n")
-                log.Printf("Before: mode=%d (% X)\n", before, getLittleEndianBytesFromInt(uint32(before)))
+                msg += fmt.Sprintf("######## Lift U UP!!! ########\n")
+                msg += fmt.Sprintf("Before: mode=%d (% X)\n", before, getLittleEndianBytesFromInt(uint32(before)))
                 if (before & 0x1) == 1 {
                     after = before | (1 << 2)
                     as := getLittleEndianBytesFromInt(uint32(after))
-                    log.Printf("After:  mode=%d (% X)\n", after, as)
+                    msg += fmt.Sprintf("After:  mode=%d (% X)\n", after, as)
                     if len(as) == (endIdx - startIdx) { // final check
                         b = slices.Replace(b, startIdx, endIdx, as...)
-                        log.Printf("-> here you go! Dump: (%d-%d) % X\n", startIdx, endIdx - 1, b[startIdx:endIdx])
+                        msg += fmt.Sprintf("-> here you go! Dump: (%d-%d) % X\n", startIdx, endIdx - 1, b[startIdx:endIdx])
                     } else {
-                        log.Printf("-> something wrong here... I can't lift you.\n")
+                        msg += fmt.Sprintf("-> something wrong here... I can't lift you.\n")
                     }
                 } else {
-                    log.Printf("-> wait aren't you a player? I can't lift you.\n")
+                    msg += fmt.Sprintf("-> wait aren't you a player? I can't lift you.\n")
                 }
             }
+
+            msg += fmt.Sprintf("<<< DONE\n\n\n\n")
+            log.Print("\n" + msg)
         }
 
         // make sure we set the body, and the relevant headers for well-formed clients to respect

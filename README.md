@@ -1,15 +1,17 @@
 # Go-up!
 
+**DISCLAIMER: This project is for study only, and does nothing with to-server requests. Use with caution and at your own risk.**
+
 A http proxy, and LIFT U UP in some cases.
 
 ### Run
 
 Run with environment variables (example):
 
-- `PORT=8080`: http proxy listen port
-- `TARGET=http://example.com:80`: proxy target
-- `SENSITIVE_HEADER=xxx`: find this header then do something
-- `ALLOWED_ID=123456,8888888`: who can be lifted
+- `PORT=8080` - http proxy listen port
+- `TARGET=http://example.com:80` - proxy target
+- `SENSITIVE_HEADER=xxx` - find this header then do something
+- `ALLOWED_ID=123456,8888888` - who can be lifted
 
 ### Thanks
 
