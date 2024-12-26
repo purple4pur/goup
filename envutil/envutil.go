@@ -1,6 +1,7 @@
 package envutil
 
 import (
+    "errors"
     "fmt"
     "log"
     "os"
@@ -45,17 +46,17 @@ func (e *Env) _getAllowedIdList(envEntry string) []int {
     return res
 }
 
-func (e Env) _isValid() bool {
+func (e Env) _validate() error {
     if e.ListenPort == "" || e.TargetUrl == "" {
-        return false
+        return errors.New("envutil.Env: no ListenPort or TargetUrl")
     }
     if e.SensitiveHeader == "" {
-        return false
+        return errors.New("envutil.Env: no SensitiveHeader")
     }
-    return true
+    return nil
 }
 
-func (e *Env) Init() {
+func (e *Env) Init() error {
     e.ListenPort = e._getListenPort("PORT")
     e.TargetUrl = e._getEnv("TARGET")
     e.SensitiveHeader = e._getEnv("SENSITIVE_HEADER")
@@ -67,10 +68,7 @@ func (e *Env) Init() {
     msg += fmt.Sprintf("  TARGET           -> TargetUrl       = %s\n", e.TargetUrl)
     msg += fmt.Sprintf("  SENSITIVE_HEADER -> SensitiveHeader = %s\n", e.SensitiveHeader)
     msg += fmt.Sprintf("  ALLOWED_ID       -> AllowedIdList   = %+v\n", e.AllowedIdList)
-    if e._isValid() {
-        log.Print(msg)
-    } else {
-        msg += fmt.Sprintf("error: Config not valid!\n")
-        log.Fatal(msg)
-    }
+    log.Print(msg)
+
+    return e._validate()
 }

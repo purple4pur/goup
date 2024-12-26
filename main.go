@@ -40,7 +40,10 @@ func getLittleEndianBytesFromInt(n uint32) []byte {
 
 func main() {
     env := new(envutil.Env)
-    env.Init()
+    err := env.Init()
+    if err != nil {
+        panic(err)
+    }
 
     u, _ := url.Parse(env.TargetUrl)
     log.Printf("Forwarding %s -> %s\n", env.ListenPort, env.TargetUrl)
