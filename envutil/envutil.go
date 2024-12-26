@@ -72,3 +72,12 @@ func (e *Env) Init() error {
 
     return e._validate()
 }
+
+func NewEnv() *Env {
+    e := new(Env)
+    err := e.Init()
+    if err != nil {
+        panic(err)
+    }
+    return e
+}
