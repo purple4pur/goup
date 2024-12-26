@@ -9,48 +9,11 @@ import (
     "net/http"
     "net/http/httputil"
     "net/url"
-    "os"
     "slices"
     "strconv"
-    "strings"
+
+    envutil "github.com/purple4pur/goup/envutil"
 )
-
-func getEnv(key string) string {
-    if value, ok := os.LookupEnv(key); ok {
-        log.Printf("ENV: %s=%s", key, value)
-        if value != "" {
-            return value
-        }
-    }
-    panic("env not set or empty")
-    return "" // unreachable
-}
-
-func getTargetUrl() string {
-    return getEnv("TARGET")
-}
-
-func getListenPort() string {
-    return ":" + getEnv("PORT")
-}
-
-func getSensitiveHeader() string {
-    return getEnv("SENSITIVE_HEADER")
-}
-
-func getAllowedIdList() []int {
-    a := getEnv("ALLOWED_ID")
-    aList := strings.Split(a, ",")
-    res := make([]int, len(aList), len(aList))
-    for i, s := range aList {
-        n, err := strconv.Atoi(s)
-        if err != nil {
-            panic(err)
-        }
-        res[i] = n
-    }
-    return res
-}
 
 type pHead struct {
     Id     [3]byte
@@ -76,13 +39,11 @@ func getLittleEndianBytesFromInt(n uint32) []byte {
 }
 
 func main() {
-    p := getListenPort()
-    t := getTargetUrl()
-    h := getSensitiveHeader()
-    a := getAllowedIdList()
+    env := new(envutil.Env)
+    env.Init()
 
-    u, _ := url.Parse(t)
-    log.Printf("Forwarding %s -> %s\n", p, t)
+    u, _ := url.Parse(env.TargetUrl)
+    log.Printf("Forwarding %s -> %s\n", env.ListenPort, env.TargetUrl)
 
     proxy := httputil.NewSingleHostReverseProxy(u)
     proxy.ModifyResponse = func(r *http.Response) error {
@@ -92,7 +53,7 @@ func main() {
         }
         defer r.Body.Close()
 
-        if r.Header.Get(h) != "" {
+        if r.Header.Get(env.SensitiveHeader) != "" {
             msg := ""
             msg += fmt.Sprintf(">>> Get response, wanna inspect this...\n")
             msg += fmt.Sprintf("Bytes length: %d\n", len(b))
@@ -145,7 +106,7 @@ func main() {
                         idNum = idNum - 0xFFFF_FFFF - 1
                     }
                     msg += fmt.Sprintf("-> (5) reply: id=%d\n", idNum)
-                    if slices.Contains(a, idNum) {
+                    if slices.Contains(env.AllowedIdList, idNum) {
                         shouldLift = true
                         msg += fmt.Sprintf("-> YES, please lift me up!!!\n")
                     } else {
@@ -199,5 +160,5 @@ func main() {
         return nil
     }
 
-    log.Fatal(http.ListenAndServe(p, proxy))
+    log.Fatal(http.ListenAndServe(env.ListenPort, proxy))
 }
