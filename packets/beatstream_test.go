@@ -10,8 +10,8 @@ func CmpEqual(a BeatStream, b BeatStream) bool {
 	if a.Size() != b.Size() {
 		return false
 	}
-	for i, v := range a.Data {
-		if v != b.Data[i] {
+	for i, v := range a.GetData() {
+		if v != b.GetData()[i] {
 			return false
 		}
 	}
@@ -40,21 +40,29 @@ func TestReadFromError(t *testing.T) {
 	}
 }
 
-func TestToInt32(t *testing.T) {
-	res, err := NewBeatStreaem(0x15, 0xCD, 0x5B, 0x07).ToInt32()
-	var want int32 = 123456789
+func TestToInt(t *testing.T) {
+	res, err := NewBeatStreaem(0x15, 0xCD, 0x5B, 0x07).ToInt()
+	want := 123456789
 	if err != nil || res != want {
-		t.Fatalf("not match: ToInt32()=%d, want=%d\n", res, want)
+		t.Fatalf("not match: ToInt()=%d, want=%d\n", res, want)
 	}
 }
 
-func TestToInt32Error(t *testing.T) {
-	_, err := NewBeatStreaem(0x00, 0x01, 0x02).ToInt32()
+func TestToIntError(t *testing.T) {
+	_, err := NewBeatStreaem(0x00, 0x01, 0x02).ToInt()
 	if err == nil {
 		t.Fatalf("not match: expect an error")
 	}
-	_, err = NewBeatStreaem(0x00, 0x01, 0x02, 0x03, 0x04).ToInt32()
+	_, err = NewBeatStreaem(0x00, 0x01, 0x02, 0x03, 0x04).ToInt()
 	if err == nil {
 		t.Fatalf("not match: expect an error")
+	}
+}
+
+func TestToPacketType(t *testing.T) {
+	res, err := NewBeatStreaem(0x4B, 0x00, 0x00).ToPacketType()
+	want := 75
+	if err != nil || res != want {
+		t.Fatalf("not match: ToPacketType()=%d, want=%d\n", res, want)
 	}
 }

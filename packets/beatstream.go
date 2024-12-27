@@ -6,39 +6,42 @@ import (
 	"slices"
 )
 
-var errFeedEof error = errors.New("packets.Beat: reading feed reaches EOF.")
-var errSizeNot4 error = errors.New("packets.Beat: ToInt32(): slice size not equals to 4.")
+var errBeatStreamSourceDrained error = errors.New("packets.BeatStream: source has drained out.")
+var errBeatStreamSizeNot3 error = errors.New("packets.BeatStream: size not equals to 3.")
+var errBeatStreamSizeNot4 error = errors.New("packets.BeatStream: size not equals to 4.")
 
 type BeatStream struct {
-	Data []byte
+	data []byte
 }
 
 func NewBeatStreaem(data ...byte) *BeatStream {
-	b := new(BeatStream)
-	b.Data = data
-	return b
+	return &BeatStream{data: data}
 }
 
 func ReadFrom(s []byte, n int) (*BeatStream, error) {
 	buf := make([]byte, n, n)
 	_, err := binary.Decode(s, binary.LittleEndian, &buf)
 	if err != nil {
-		return nil, errFeedEof
+		return nil, errBeatStreamSourceDrained
 	}
 	return NewBeatStreaem(buf...), nil
 }
 
-func (b BeatStream) Size() int {
-	return len(b.Data)
+func (b BeatStream) GetData() []byte {
+	return b.data
 }
 
-func (b BeatStream) ToInt32() (int32, error) {
+func (b BeatStream) Size() int {
+	return len(b.data)
+}
+
+func (b BeatStream) ToInt() (int, error) {
 	if b.Size() != 4 {
-		return 0, errSizeNot4
+		return 0, errBeatStreamSizeNot4
 	}
 	var res int
 	s := make([]byte, 4, 4)
-	_ = copy(s, b.Data)
+	_ = copy(s, b.data)
 	slices.Reverse(s)
 	for _, v := range s {
 		res <<= 8
@@ -47,5 +50,14 @@ func (b BeatStream) ToInt32() (int32, error) {
 	if res >= 0x8000_0000 { // negative number
 		res -= (0xFFFF_FFFF + 1)
 	}
-	return int32(res), nil
+	return res, nil
+}
+
+func (b BeatStream) ToPacketType() (int, error) {
+	if b.Size() != 3 {
+		return 0, errBeatStreamSizeNot3
+	}
+	d := append(b.data, 0x00)
+	res, _ := NewBeatStreaem(d...).ToInt()
+	return res, nil
 }
