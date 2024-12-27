@@ -6,7 +6,7 @@ import (
 	. "github.com/purple4pur/goup/packets"
 )
 
-func CmpEqual(a BeatStream, b BeatStream) bool {
+func CmpBeatStreamEqual(a *BeatStream, b *BeatStream) bool {
 	if a.Size() != b.Size() {
 		return false
 	}
@@ -22,12 +22,12 @@ func TestReadFrom(t *testing.T) {
 	data := []byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05}
 	res, _ := ReadFrom(data, 4)
 	want := NewBeatStreaem(0x00, 0x01, 0x02, 0x03)
-	if !CmpEqual(*res, *want) {
+	if !CmpBeatStreamEqual(res, want) {
 		t.Fatalf("not match: ReadFrom()=% X, want=% X\n", *res, *want)
 	}
 	res, _ = ReadFrom(data[2:], 4)
 	want = NewBeatStreaem(0x02, 0x03, 0x04, 0x05)
-	if !CmpEqual(*res, *want) {
+	if !CmpBeatStreamEqual(res, want) {
 		t.Fatalf("not match: ReadFrom()=% X, want=% X\n", *res, *want)
 	}
 }
