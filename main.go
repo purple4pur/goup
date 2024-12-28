@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	envutil "github.com/purple4pur/goup/envutil"
+	"github.com/purple4pur/goup/packets"
 )
 
 type pHead struct {
@@ -51,6 +52,10 @@ func main() {
 			return err
 		}
 		defer r.Body.Close()
+
+		unpacker := packets.NewUnpacker(b)
+		unpacker.UnpackAll()
+		unpacker.DumpData()
 
 		if r.Header.Get(env.SensitiveHeader) != "" {
 			msg := ""

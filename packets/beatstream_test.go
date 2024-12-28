@@ -23,12 +23,12 @@ func TestReadFrom(t *testing.T) {
 	res, _ := ReadFrom(data, 4)
 	want := NewBeatStreaem(0x00, 0x01, 0x02, 0x03)
 	if !CmpBeatStreamEqual(res, want) {
-		t.Fatalf("not match: ReadFrom()=% X, want=% X\n", *res, *want)
+		t.Fatalf("not match:\n  res=% X\n  want=% X\n", *res, *want)
 	}
 	res, _ = ReadFrom(data[2:], 4)
 	want = NewBeatStreaem(0x02, 0x03, 0x04, 0x05)
 	if !CmpBeatStreamEqual(res, want) {
-		t.Fatalf("not match: ReadFrom()=% X, want=% X\n", *res, *want)
+		t.Fatalf("not match:\n  res=% X\n  want=% X\n", *res, *want)
 	}
 }
 
@@ -44,7 +44,7 @@ func TestToInt(t *testing.T) {
 	res, err := NewBeatStreaem(0x15, 0xCD, 0x5B, 0x07).ToInt()
 	want := 123456789
 	if err != nil || res != want {
-		t.Fatalf("not match: ToInt()=%d, want=%d\n", res, want)
+		t.Fatalf("not match: res=%d, want=%d\n", res, want)
 	}
 }
 
@@ -63,6 +63,6 @@ func TestToPacketType(t *testing.T) {
 	res, err := NewBeatStreaem(0x4B, 0x00, 0x00).ToPacketType()
 	want := 75
 	if err != nil || res != want {
-		t.Fatalf("not match: ToPacketType()=%d, want=%d\n", res, want)
+		t.Fatalf("not match: res=%d, want=%d\n", res, want)
 	}
 }

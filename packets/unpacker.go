@@ -2,6 +2,8 @@ package packets
 
 import (
 	"errors"
+	"fmt"
+	"log"
 )
 
 var errUnpackerSourceDrained error = errors.New("packets.Unpacker: source has drained out.")
@@ -63,4 +65,23 @@ func (u *Unpacker) Next() error {
 
 	u.data = append(u.data, NewPacket(pktT, length, data))
 	return nil
+}
+
+func (u *Unpacker) UnpackAll() {
+	for err := error(nil); err == nil; {
+		err = u.Next()
+	}
+}
+
+func (u *Unpacker) DumpData() {
+	msg := "[Unpacker/DumpData] --------------------------------\n"
+	for _, v := range u.data {
+		p, err := v.Decode()
+		if err != nil {
+			msg += fmt.Sprintf("%s (%d)\n", err, v.GetType())
+			continue
+		}
+		msg += p.Sprint()
+	}
+	log.Print(msg)
 }
