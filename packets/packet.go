@@ -30,6 +30,10 @@ func (p Packet) GetData() *BeatStream {
 
 func (p Packet) Decode() (PackerTyper, error) {
 	switch p.pktT {
+	case 5:
+		return NewPacketType5(p.data)
+	case 71:
+		return NewPacketType71(p.data)
 	case 75:
 		return NewPacketType75(p.data)
 	default:
