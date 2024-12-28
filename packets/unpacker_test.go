@@ -40,17 +40,17 @@ func TestUnpacker(t *testing.T) {
 		t.Fatalf("not match: len(data)=%d, want=%d\n", len(u.GetData()), 3)
 	}
 	res := u.GetData()[0]
-	want := NewPacket(75, 4, NewBeatStreaem(0x13, 0x00, 0x00, 0x00))
+	want := NewPacket(75, 4, NewBeatStream(0x13, 0x00, 0x00, 0x00))
 	if !CmpPacketEqual(res, want) {
 		t.Fatalf("not match:\n  data[0]=%+v\n  want=%+v\n", *res, *want)
 	}
 	res = u.GetData()[1]
-	want = NewPacket(5, 4, NewBeatStreaem(0x15, 0xCD, 0x5B, 0x07))
+	want = NewPacket(5, 4, NewBeatStream(0x15, 0xCD, 0x5B, 0x07))
 	if !CmpPacketEqual(res, want) {
 		t.Fatalf("not match:\n  data[1]=%+v\n  want=%+v\n", *res, *want)
 	}
 	res = u.GetData()[2]
-	want = NewPacket(71, 4, NewBeatStreaem(0x01, 0x00, 0x00, 0x00))
+	want = NewPacket(71, 4, NewBeatStream(0x01, 0x00, 0x00, 0x00))
 	if !CmpPacketEqual(res, want) {
 		t.Fatalf("not match:\n  data[2]=%+v\n  want=%+v\n", *res, *want)
 	}

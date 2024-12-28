@@ -29,7 +29,7 @@ func Cmp71Equal(a *PacketType71, b *PacketType71) bool {
 }
 
 func TestDecode5(t *testing.T) {
-	p := NewPacket(5, 4, NewBeatStreaem(0x15, 0xCD, 0x5B, 0x07))
+	p := NewPacket(5, 4, NewBeatStream(0x15, 0xCD, 0x5B, 0x07))
 	res, _ := p.Decode()
 	want := &PacketType5{Id: 123456789}
 	if res == nil || res.GetPacketType() != 5 || res.(*PacketType5).Id != want.Id {
@@ -38,7 +38,7 @@ func TestDecode5(t *testing.T) {
 }
 
 func TestDecode71(t *testing.T) {
-	p := NewPacket(71, 4, NewBeatStreaem(0x05, 0x00, 0x00, 0x00))
+	p := NewPacket(71, 4, NewBeatStream(0x05, 0x00, 0x00, 0x00))
 	res, _ := p.Decode()
 	want := &PacketType71{
 		Player: Bit{true},
@@ -54,7 +54,7 @@ func TestDecode71(t *testing.T) {
 }
 
 func TestDecode75(t *testing.T) {
-	p := NewPacket(75, 4, NewBeatStreaem(0x13, 0x00, 0x00, 0x00))
+	p := NewPacket(75, 4, NewBeatStream(0x13, 0x00, 0x00, 0x00))
 	res, _ := p.Decode()
 	want := &PacketType75{Version: 19}
 	if res == nil || res.GetPacketType() != 75 || res.(*PacketType75).Version != want.Version {

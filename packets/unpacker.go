@@ -39,7 +39,7 @@ func (u *Unpacker) Next() error {
 		return err
 	}
 
-	b, err := ReadFrom(u.src[u.pace:], 3)
+	b, err := NewBeatStreamFromBytes(u.src[u.pace:], 3)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (u *Unpacker) Next() error {
 	}
 	pktT, _ := b.ToPacketType()
 
-	b, err = ReadFrom(u.src[u.pace:], 4)
+	b, err = NewBeatStreamFromBytes(u.src[u.pace:], 4)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (u *Unpacker) Next() error {
 	}
 	length, _ := b.ToInt()
 
-	data, err := ReadFrom(u.src[u.pace:], length)
+	data, err := NewBeatStreamFromBytes(u.src[u.pace:], length)
 	if err != nil {
 		return err
 	}

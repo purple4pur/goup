@@ -14,17 +14,26 @@ type BeatStream struct {
 	data []byte
 }
 
-func NewBeatStreaem(data ...byte) *BeatStream {
+func NewBeatStream(data ...byte) *BeatStream {
 	return &BeatStream{data: data}
 }
 
-func ReadFrom(s []byte, n int) (*BeatStream, error) {
+func NewBeatStreamFromBytes(s []byte, n int) (*BeatStream, error) {
 	buf := make([]byte, n, n)
 	_, err := binary.Decode(s, binary.LittleEndian, &buf)
 	if err != nil {
 		return nil, errBeatStreamSourceDrained
 	}
-	return NewBeatStreaem(buf...), nil
+	return NewBeatStream(buf...), nil
+}
+
+func NewBeatStreamFromInt(v int) *BeatStream {
+	if v < 0 {
+		v += (0xFFFF_FFFF + 1)
+	}
+	buf := make([]byte, 4, 4)
+	binary.LittleEndian.PutUint32(buf, uint32(v))
+	return NewBeatStream(buf...)
 }
 
 func (b BeatStream) GetData() []byte {
@@ -39,7 +48,7 @@ func (b BeatStream) ToInt() (int, error) {
 	if b.Size() != 4 {
 		return 0, errBeatStreamSizeNot4
 	}
-	var res int
+	res := 0
 	s := make([]byte, 4, 4)
 	_ = copy(s, b.data)
 	slices.Reverse(s)
@@ -58,6 +67,6 @@ func (b BeatStream) ToPacketType() (int, error) {
 		return 0, errBeatStreamSizeNot3
 	}
 	d := append(b.data, 0x00)
-	res, _ := NewBeatStreaem(d...).ToInt()
+	res, _ := NewBeatStream(d...).ToInt()
 	return res, nil
 }
