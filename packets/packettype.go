@@ -15,16 +15,21 @@ func CreateBit(v int) Bit {
 	return Bit{true}
 }
 
-func (b Bit) Sprint() string {
+func (b Bit) ToInt() int {
 	if b.High {
-		return "1"
+		return 1
 	}
-	return "0"
+	return 0
+}
+
+func (b Bit) Sprint() string {
+	return fmt.Sprintf("%d", b.ToInt())
 }
 
 type PackerTyper interface {
 	GetPacketType() int
 	Sprint() string
+	Pack() *BeatStream
 }
 
 // PacketType5: player
@@ -47,6 +52,10 @@ func (p PacketType5) Sprint() string {
 	res += fmt.Sprintf("  Id: %d\n", p.Id)
 	res += "}\n"
 	return res
+}
+
+func (p PacketType5) Pack() *BeatStream {
+	return NewBeatStreamFromInt(p.Id)
 }
 
 // PacketType71: client mode
@@ -84,6 +93,16 @@ func (p PacketType71) Sprint() string {
 	return res
 }
 
+func (p PacketType71) Pack() *BeatStream {
+	m := (p.Player.ToInt() << 0) |
+		(p.Bit1.ToInt() << 1) |
+		(p.Upper.ToInt() << 2) |
+		(p.Bit1.ToInt() << 3) |
+		(p.Bit1.ToInt() << 4) |
+		(p.Bit1.ToInt() << 5)
+	return NewBeatStreamFromInt(m)
+}
+
 // PacketType75: protocol
 type PacketType75 struct {
 	Version int
@@ -104,4 +123,8 @@ func (p PacketType75) Sprint() string {
 	res += fmt.Sprintf("  Version: %d\n", p.Version)
 	res += "}\n"
 	return res
+}
+
+func (p PacketType75) Pack() *BeatStream {
+	return NewBeatStreamFromInt(p.Version)
 }

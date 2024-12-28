@@ -40,3 +40,10 @@ func (p Packet) Decode() (PackerTyper, error) {
 		return nil, ErrPacketUnknownType
 	}
 }
+
+func (p Packet) Pack() *BeatStream {
+	res := NewBeatStreamFromPacketType(p.pktT)
+	res.AppendBeatStream(NewBeatStreamFromInt(p.data.Size()))
+	res.AppendBeatStream(p.data)
+	return res
+}

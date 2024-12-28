@@ -36,12 +36,22 @@ func NewBeatStreamFromInt(v int) *BeatStream {
 	return NewBeatStream(buf...)
 }
 
+func NewBeatStreamFromPacketType(v int) *BeatStream {
+	buf := make([]byte, 4, 4)
+	binary.LittleEndian.PutUint32(buf, uint32(v))
+	return NewBeatStream(buf[0:3]...)
+}
+
 func (b BeatStream) GetData() []byte {
 	return b.data
 }
 
 func (b BeatStream) Size() int {
 	return len(b.data)
+}
+
+func (b *BeatStream) AppendBeatStream(s *BeatStream) {
+	b.data = append(b.data, s.GetData()...)
 }
 
 func (b BeatStream) ToInt() (int, error) {
