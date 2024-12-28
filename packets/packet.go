@@ -1,5 +1,11 @@
 package packets
 
+import (
+	"errors"
+)
+
+var ErrPacketUnknownType error = errors.New("packets.Packet: unknown packet type.")
+
 type Packet struct {
 	pktT   int
 	length int
@@ -20,4 +26,13 @@ func (p Packet) GetLength() int {
 
 func (p Packet) GetData() *BeatStream {
 	return p.data
+}
+
+func (p Packet) Decode() (PackerTyper, error) {
+	switch p.pktT {
+	case 75:
+		return NewPacketType75(p.data)
+	default:
+		return nil, ErrPacketUnknownType
+	}
 }
