@@ -31,7 +31,7 @@ func TestUnpacker(t *testing.T) {
 		0x04, 0x00, 0x00, 0x00,
 		0x01, 0x00, 0x00, 0x00,
 	}
-	u := NewUnpacker(data)
+	u := NewUnpackerFromBytes(data)
 	u.UnpackAll()
 	if u.GetPace() != 33 {
 		t.Fatalf("not match: pace=%d, want=%d\n", u.GetPace(), 33)

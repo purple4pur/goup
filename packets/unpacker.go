@@ -3,7 +3,6 @@ package packets
 import (
 	"errors"
 	"fmt"
-	"log"
 )
 
 var errUnpackerSourceDrained error = errors.New("packets.Unpacker: source has drained out.")
@@ -14,7 +13,7 @@ type Unpacker struct {
 	data []*Packet
 }
 
-func NewUnpacker(s []byte) *Unpacker {
+func NewUnpackerFromBytes(s []byte) *Unpacker {
 	return &Unpacker{src: s}
 }
 
@@ -73,15 +72,15 @@ func (u *Unpacker) UnpackAll() {
 	}
 }
 
-func (u *Unpacker) DumpData() {
-	msg := "[Unpacker/DumpData] --------------------------------\n"
+func (u *Unpacker) SprintLn() string {
+	msg := ""
 	for _, v := range u.data {
-		p, err := v.Decode()
+		pt, err := v.Decode()
 		if err != nil {
 			msg += fmt.Sprintf("%s (%d)\n", err, v.GetType())
 			continue
 		}
-		msg += p.Sprint()
+		msg += pt.SprintLn()
 	}
-	log.Print(msg)
+	return msg
 }

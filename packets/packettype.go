@@ -15,6 +15,10 @@ func CreateBit(v int) Bit {
 	return Bit{true}
 }
 
+func (b *Bit) Set1() {
+	b.High = true
+}
+
 func (b Bit) ToInt() int {
 	if b.High {
 		return 1
@@ -28,7 +32,7 @@ func (b Bit) Sprint() string {
 
 type PackerTyper interface {
 	GetPacketType() int
-	Sprint() string
+	SprintLn() string
 	Pack() *BeatStream
 }
 
@@ -47,8 +51,9 @@ func NewPacketType5(s *BeatStream) (*PacketType5, error) {
 
 func (p PacketType5) GetPacketType() int { return 5 }
 
-func (p PacketType5) Sprint() string {
-	res := "{ // type5 (player)\n"
+func (p PacketType5) SprintLn() string {
+	res := "// type5 (player)\n"
+	res += "{\n"
 	res += fmt.Sprintf("  Id: %d\n", p.Id)
 	res += "}\n"
 	return res
@@ -85,8 +90,9 @@ func NewPacketType71(s *BeatStream) (*PacketType71, error) {
 
 func (p PacketType71) GetPacketType() int { return 71 }
 
-func (p PacketType71) Sprint() string {
-	res := "{ // type71 (client mode)\n"
+func (p PacketType71) SprintLn() string {
+	res := "// type71 (client mode)\n"
+	res += "{\n"
 	res += fmt.Sprintf("  Player: %s\n", p.Player.Sprint())
 	res += fmt.Sprintf("  Upper: %s\n", p.Upper.Sprint())
 	res += "}\n"
@@ -101,6 +107,10 @@ func (p PacketType71) Pack() *BeatStream {
 		(p.Bit1.ToInt() << 4) |
 		(p.Bit1.ToInt() << 5)
 	return NewBeatStreamFromInt(m)
+}
+
+func (p *PacketType71) GoUp() {
+	p.Upper.Set1()
 }
 
 // PacketType75: protocol
@@ -118,8 +128,9 @@ func NewPacketType75(s *BeatStream) (*PacketType75, error) {
 
 func (p PacketType75) GetPacketType() int { return 75 }
 
-func (p PacketType75) Sprint() string {
-	res := "{ // type75 (protocol)\n"
+func (p PacketType75) SprintLn() string {
+	res := "// type75 (protocol)\n"
+	res += "{\n"
 	res += fmt.Sprintf("  Version: %d\n", p.Version)
 	res += "}\n"
 	return res

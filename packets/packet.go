@@ -16,6 +16,13 @@ func NewPacket(t int, l int, d *BeatStream) *Packet {
 	return &Packet{pktT: t, length: l, data: d}
 }
 
+func NewPacketFromPacketTyper(p PackerTyper) *Packet {
+	pktT := p.GetPacketType()
+	data := p.Pack()
+	length := data.Size()
+	return &Packet{pktT, length, data}
+}
+
 func (p Packet) GetType() int {
 	return p.pktT
 }
