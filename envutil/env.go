@@ -16,21 +16,21 @@ type Env struct {
 	AllowedIdList   []int
 }
 
-func (e *Env) _getEnv(envEntry string) string {
+func (e *Env) readEnv(envEntry string) string {
 	res, _ := os.LookupEnv(envEntry)
 	return res
 }
 
-func (e *Env) _getListenPort(envEntry string) string {
-	if res := e._getEnv(envEntry); res != "" {
+func (e *Env) readListenPort(envEntry string) string {
+	if res := e.readEnv(envEntry); res != "" {
 		return ":" + res
 	} else {
 		return ""
 	}
 }
 
-func (e *Env) _getAllowedIdList(envEntry string) []int {
-	a := e._getEnv(envEntry)
+func (e *Env) readAllowedIdList(envEntry string) []int {
+	a := e.readEnv(envEntry)
 	if a == "" {
 		return []int{}
 	}
@@ -46,7 +46,7 @@ func (e *Env) _getAllowedIdList(envEntry string) []int {
 	return res
 }
 
-func (e Env) _validate() error {
+func (e Env) validate() error {
 	if e.ListenPort == "" || e.TargetUrl == "" {
 		return errors.New("envutil.Env: no ListenPort or TargetUrl")
 	}
@@ -56,28 +56,29 @@ func (e Env) _validate() error {
 	return nil
 }
 
-func (e *Env) Init() error {
-	e.ListenPort = e._getListenPort("PORT")
-	e.TargetUrl = e._getEnv("TARGET")
-	e.SensitiveHeader = e._getEnv("SENSITIVE_HEADER")
-	e.AllowedIdList = e._getAllowedIdList("ALLOWED_ID")
-
-	msg := fmt.Sprintf("[Env/Init] --------------------------------\n")
-	msg += fmt.Sprintf("Read and parsed from env:\n")
+func (e Env) SprintLn() string {
+	msg := "{\n"
 	msg += fmt.Sprintf("  PORT             -> ListenPort      = %s\n", e.ListenPort)
 	msg += fmt.Sprintf("  TARGET           -> TargetUrl       = %s\n", e.TargetUrl)
 	msg += fmt.Sprintf("  SENSITIVE_HEADER -> SensitiveHeader = %s\n", e.SensitiveHeader)
 	msg += fmt.Sprintf("  ALLOWED_ID       -> AllowedIdList   = %+v\n", e.AllowedIdList)
-	log.Print(msg)
+	msg += "}\n"
+	return msg
+}
 
-	return e._validate()
+func (e *Env) Init() {
+	e.ListenPort = e.readListenPort("PORT")
+	e.TargetUrl = e.readEnv("TARGET")
+	e.SensitiveHeader = e.readEnv("SENSITIVE_HEADER")
+	e.AllowedIdList = e.readAllowedIdList("ALLOWED_ID")
+	err := e.validate()
+	if err != nil {
+		log.Fatalf("error: %s\n%s", err, e.SprintLn())
+	}
 }
 
 func NewEnv() *Env {
 	e := new(Env)
-	err := e.Init()
-	if err != nil {
-		panic(err)
-	}
+	e.Init()
 	return e
 }

@@ -76,8 +76,10 @@ func ModifyResponse(r *http.Response) error {
 }
 
 func main() {
+	log.Printf("[Env] --------------------------------\n%s", env.SprintLn())
+
 	u, _ := url.Parse(env.TargetUrl)
-	log.Printf("Forwarding %s -> %s\n", env.ListenPort, env.TargetUrl)
+	log.Printf("[main] --------------------------------\nForwarding %s -> %s\n", env.ListenPort, env.TargetUrl)
 
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.ModifyResponse = ModifyResponse
