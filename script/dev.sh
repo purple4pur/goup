@@ -1,1 +1,1 @@
-docker run --rm -it -v .:/app golang:alpine sh
+docker run --rm -it -v .:/app -w /app golang:alpine sh
